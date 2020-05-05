@@ -22,10 +22,10 @@ import (
 	"github.com/runatlantis/atlantis/server/events/models"
 	"github.com/runatlantis/atlantis/server/events/vcs/common"
 
-	"github.com/Laisky/graphql"
 	"github.com/google/go-github/v28/github"
 	"github.com/pkg/errors"
 	"github.com/shurcooL/githubv4"
+	"github.com/shurcooL/graphql"
 )
 
 // maxCommentLength is the maximum number of chars allowed in a single comment
@@ -66,18 +66,7 @@ func NewGithubClient(hostname string, user string, pass string) (*GithubClient, 
 		}
 	}
 
-	// shurcooL's githubv4 library has a client ctor, but it doesn't support schema
-	// previews, which need custom Accept headers (https://developer.github.com/v4/previews)
-	// So for now use the graphql client, since the githubv4 library was basically
-	// a simple wrapper around it. And instead of using shurcooL's graphql lib, use
-	// Laisky's, since shurcooL's doesn't support custom headers.
-	// Once the Minimize Comment schema is official, this can revert back to using
-	// shurcooL's libraries completely.
-	v4MutateClient := graphql.NewClient(
-		graphqlURL,
-		tp.Client(),
-		graphql.WithHeader("Accept", "application/vnd.github.queen-beryl-preview+json"),
-	)
+	v4MutateClient := graphql.NewClient(graphqlURL, tp.Client())
 
 	return &GithubClient{
 		user:           user,
